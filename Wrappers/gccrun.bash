@@ -3,6 +3,8 @@
 # may support multiple files in future
 # add versioning for backups?
 
+STD="c99"
+
 if [ "$#" -ne 1 ]; then
 	echo "gccrun: Expected only one file to make executable"
 	exit 1
@@ -29,7 +31,7 @@ sig_int_during_gcc(){
 
 replace_existing_exe() {
 	rm "$EXE_FILE_NAME"
-	gcc -o "$EXE_FILE_NAME" "$C_FILE"
+	gcc -std=$STD -o "$EXE_FILE_NAME" "$C_FILE"
 }
 
 if [ -f $EXE_FILE_NAME ]; then
@@ -49,7 +51,7 @@ if [ -f $EXE_FILE_NAME ]; then
 	fi
 else
 	trap sig_int_during_gcc SIGINT	
-	gcc -o "$EXE_FILE_NAME" "$C_FILE"
+	gcc -std=$STD -o "$EXE_FILE_NAME" "$C_FILE"
 fi
 
 # gcc errors won't stop this program
