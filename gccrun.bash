@@ -52,5 +52,9 @@ else
 	gcc -o "$EXE_FILE_NAME" "$C_FILE"
 fi
 
-./$EXE_FILE_NAME   
+# gcc errors won't stop this program
+if [ ! -f $EXE_FILE_NAME ]; then
+	exit 1
+fi
 
+./$EXE_FILE_NAME  
