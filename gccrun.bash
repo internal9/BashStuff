@@ -10,12 +10,22 @@ fi
 
 C_FILE="$1"
 
-if [[ "$C_FILE" != *.c || ! -f $C_FILE ]]; then
-	echo "gccrun: file '$C_FILE' doesn't exist or have '.c' file extension, can't make executable"
+if [ ! -f "$C_FILE" ]; then
+	echo "gccrun: file '$C_FILE' doesn't exist, can't make executable"
+	exit 1
+fi
+
+if [[ "$C_FILE" != *.c ]]; then
+	echo "gccrun: file '$C_FILE' doesn't have '.c' file extension, can't make executable"
 	exit 1
 fi
 
 EXE_FILE_NAME="${C_FILE%.c}"
+
+sig_int_during_gcc(){
+	echo "gccrun:SIGINT sent during gcc may have rendered executable incomplete"
+	exit 130
+}
 
 replace_existing_exe() {
 	rm "$EXE_FILE_NAME"
@@ -28,13 +38,19 @@ if [ -f $EXE_FILE_NAME ]; then
 		read will_overwrite_non_exe
 
 		if [ "$will_overwrite_non_exe" = "Y" ] || [ "$will_overwrite_non_exe" = "y" ]; then
+			trap sig_int_during_gcc SIGINT
 			replace_existing_exe
 		else
 			exit 0
 		fi
 	else
+		trap sig_int_during_gcc SIGINT
 		replace_existing_exe
 	fi
 else
+	trap sig_int_during_gcc SIGINT	
 	gcc -o "$EXE_FILE_NAME" "$C_FILE"
-fi   
+fi
+
+./$EXE_FILE_NAME   
+
